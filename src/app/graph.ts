@@ -19,6 +19,7 @@ export class Graph {
   line: any;
   margin: Margin;
   rectangular_selection: Selection<BaseType, any, HTMLElement, any>;
+  rectangular_selection_text: Selection<BaseType, any, HTMLElement, any>;
   rectangular_selection_x_coordinate: number;
 }
 

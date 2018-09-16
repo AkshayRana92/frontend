@@ -6,14 +6,14 @@ import {catchError} from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
-export class TaskService {
+export class PowerService {
 
   readonly api = 'http://localhost:3000';
 
   constructor(private http: HttpClient) { }
 
-  getPowerReadingsForLastDay(): Observable<any> {
-    // const GET_POWER_URL = `${this.api}/power`;
+  getPowerReadingsForLastDay(fromTime: number, toTime: number): Observable<any> {
+    // const GET_POWER_URL = `${this.api}/power?from=${fromTime}&to=${toTime}`;
     const GET_POWER_URL = `http://localhost:4200/assets/powers.json`;
     return this.http.get(GET_POWER_URL).pipe(
       catchError(this.handleError)
@@ -43,4 +43,5 @@ export class TaskService {
     return throwError(
       'Something bad happened; please try again later.');
   }
+
 }

@@ -1,3 +1,9 @@
 .area {
   fill: lightsteelblue;
 }
+h2 {
+  text-align: center;
+}
+span {
+  color: #3f873a;
+}

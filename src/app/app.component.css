@@ -1,4 +1,10 @@
-.line-chart
-{
+.line-chart {
   border: 1px solid lightgray;
+}
+header {
+  background: rgb(248, 248, 248);
+}
+img {
+  padding: 2% 0 2% 2%;
+  width: 20%;
 }
