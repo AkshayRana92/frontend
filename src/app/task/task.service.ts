@@ -13,7 +13,8 @@ export class TaskService {
   constructor(private http: HttpClient) { }
 
   getPowerReadingsForLastDay(): Observable<any> {
-    const GET_POWER_URL = `${this.api}/power`;
+    // const GET_POWER_URL = `${this.api}/power`;
+    const GET_POWER_URL = `http://localhost:4200/assets/powers.json`;
     return this.http.get(GET_POWER_URL).pipe(
       catchError(this.handleError)
     );
@@ -21,6 +22,7 @@ export class TaskService {
 
   getLastPowerReading(): Observable<any> {
     const GET_POWER_URL = `${this.api}/power/last`;
+    // const GET_POWER_URL = `http://localhost:4200/assets/latest.json`;
     return this.http.get(GET_POWER_URL).pipe(
       catchError(this.handleError)
     );

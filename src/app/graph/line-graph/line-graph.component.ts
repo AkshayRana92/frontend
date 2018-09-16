@@ -1,19 +1,18 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Graph} from '../../graph';
 import {ActivatedRoute} from '@angular/router';
-import {TaskService} from './task.service';
-
+import {TaskService} from '../../task/task.service';
 import * as d3 from 'd3';
-import {Graph} from '../graph';
-import {ZoomScale} from 'd3';
 
 @Component({
-  selector: 'app-task',
-  templateUrl: './task.component.html',
-  styleUrls: ['./task.component.css']
+  selector: 'app-line-graph',
+  templateUrl: './line-graph.component.html',
+  styleUrls: ['./line-graph.component.css']
 })
-export class TaskComponent implements OnInit, OnDestroy {
+export class LineGraphComponent implements OnInit, OnDestroy {
 
   private timer: any;
+
   graph: Graph = {
     data: undefined,
     x_scale: undefined,
