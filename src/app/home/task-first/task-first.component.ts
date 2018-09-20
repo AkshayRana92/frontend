@@ -51,8 +51,12 @@ export class TaskFirstComponent implements OnInit, OnDestroy {
         this.currentDay = new Date().setHours(0, 0, 0, 0);
         this.powerService.getPowerReadingsForLastDay(this.currentDay, toTime).subscribe((newPowerData: Power[]) => {
           this.graphData = newPowerData;
+        }, err => {
+          console.error(err);
         });
       }
+    }, err => {
+      console.error(err);
     });
   }
 

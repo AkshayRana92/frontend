@@ -4,9 +4,7 @@ import { Observable } from 'rxjs';
 import {map, take} from 'rxjs/operators';
 import {PowerService} from './power.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TaskResolver implements Resolve<any> {
 
   constructor(private service: PowerService) {}

@@ -3,11 +3,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskSecondComponent } from './task-second.component';
 import {ActivatedRoute} from '@angular/router';
 import {PowerService} from '../power.service';
-import {of} from 'rxjs';
-import {LineGraphComponent} from '../../graph/line-graph/line-graph.component';
-import {D3_TOKEN} from '../../graph/d3.config';
+import {of, throwError} from 'rxjs';
 import {Component, Input} from '@angular/core';
 import {Power} from '../../power';
+import {LoaderService} from '../../shared/loader/loader.service';
 
 @Component({selector: 'app-line-graph', template: ''})
 class LineGraphStubComponent {
@@ -18,20 +17,20 @@ class LineGraphStubComponent {
 describe('TaskSecondComponent', () => {
   let component: TaskSecondComponent;
   let fixture: ComponentFixture<TaskSecondComponent>;
-  // let powerService: PowerService;
+  let loaderService: LoaderService;
 
   let powerData = [{'time': 1537079694837, 'values': {'power': 1676000, 'energy': 333531381728000}}];
   const ActivatedRouteMock = {
     data: of({powerData})
   };
 
-  const PowerServiceMock = jasmine.createSpyObj('PowerService', ['getLastPowerReading']);
+  const PowerServiceMock = jasmine.createSpyObj('PowerService', ['getLastPowerReading', 'getPowerReadingsForLastDay']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ TaskSecondComponent, LineGraphStubComponent ],
       providers: [{provide: ActivatedRoute, useValue: ActivatedRouteMock},
-        {provide: PowerService, useValue: PowerServiceMock}]
+        {provide: PowerService, useValue: PowerServiceMock}, LoaderService]
     })
     .compileComponents();
   }));
@@ -39,7 +38,8 @@ describe('TaskSecondComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskSecondComponent);
     component = fixture.componentInstance;
-    // powerService = TestBed.get(PowerService);
+    loaderService = TestBed.get(LoaderService);
+    spyOn(loaderService, 'stopLoading');
   });
 
   it('should create', () => {
@@ -52,22 +52,39 @@ describe('TaskSecondComponent', () => {
 
     expect(component.getNewReadingPeriodically).toHaveBeenCalled();
     expect(component.graphData).toEqual(powerData);
+    expect(loaderService.stopLoading).toHaveBeenCalled();
   });
 
-  it('should get data on initialization', () => {
+  it('should get PowerReading', () => {
+    const timeBiggerThanEndingDay = new Date().setHours(0, 0, 0, 0) + (60 * 60 * 1000 *25 );
     spyOn(component, 'getNewReadingPeriodically');
-    component.getNewReadingPeriodically();
-
-    expect(component.getNewReadingPeriodically).toHaveBeenCalled();
-    expect(component.graphData).toEqual(powerData);
+    PowerServiceMock.getLastPowerReading.and.returnValue(of({'time': timeBiggerThanEndingDay,
+      'values': {'power': 1676000, 'energy': 333531381728000}}));
+    PowerServiceMock.getPowerReadingsForLastDay.and.returnValue(of([{'time': timeBiggerThanEndingDay,
+      'values': {'power': 1676000, 'energy': 333531381728000}}]));
+    component.getPowerReading();
+    expect(PowerServiceMock.getLastPowerReading).toHaveBeenCalled();
+    expect(PowerServiceMock.getPowerReadingsForLastDay).toHaveBeenCalled();
+    expect(component.graphData).toEqual([{'time': timeBiggerThanEndingDay, 'values': {'power': 1676000, 'energy': 333531381728000}}]);
   });
 
-  // it('should get data on initialization', () => {
-  //   spyOn(component, 'getNewReadingPeriodically');
-  //   // powerData.getLastPowerReading.and.returnValue
-  //   component.getPowerReading();
-  //
-  //   expect(component.getNewReadingPeriodically).toHaveBeenCalled();
-  //   expect(component.graphData).toEqual(powerData);
-  // });
+  it('should not be able to get PowerReading : getLastPowerReading Exception', () => {
+    spyOn(component, 'getNewReadingPeriodically');
+    spyOn(console, 'error');
+    PowerServiceMock.getLastPowerReading.and.returnValue(throwError(new Error('test')));
+    component.getPowerReading();
+    expect(console.error).toHaveBeenCalledWith(new Error('test'));
+  });
+
+  it('should not be able to get PowerReading : getPowerReadingsForLastDay Exception', () => {
+    const timeBiggerThanEndingDay = new Date().setHours(0, 0, 0, 0) + (60 * 60 * 1000 *25 );
+    spyOn(component, 'getNewReadingPeriodically');
+    spyOn(console, 'error');
+    PowerServiceMock.getLastPowerReading.and.returnValue(of({'time': timeBiggerThanEndingDay,
+      'values': {'power': 1676000, 'energy': 333531381728000}}));
+    PowerServiceMock.getPowerReadingsForLastDay.and.returnValue(throwError(new Error('test')));
+    component.getPowerReading();
+    expect(console.error).toHaveBeenCalledWith(new Error('test'));
+  });
+
 });

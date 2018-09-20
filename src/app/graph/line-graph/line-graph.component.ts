@@ -17,25 +17,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
   @Input() data: Power[];
   @Input() newValue: Power;
 
-  graph: Graph = {
-    data: undefined,
-    x_scale: undefined,
-    y_scale: undefined,
-    x_axis: undefined,
-    y_axis: undefined,
-    svg: undefined,
-    parent_group: undefined,
-    width: undefined,
-    height: undefined,
-    zoomed_x_scale: undefined,
-    transform_state: undefined,
-    line: undefined,
-    area: undefined,
-    margin: undefined,
-    rectangular_selection: undefined,
-    rectangular_selection_text: undefined,
-    rectangular_selection_x_coordinate: undefined
-  };
+  graph: Graph = new Graph();
 
   constructor(@Inject(D3_TOKEN) private _d3: any) {
   }
@@ -56,8 +38,9 @@ export class LineGraphComponent implements OnInit, OnChanges {
     }
     if (changes['data'] && this.data) {
       if (!changes['data'].isFirstChange()) {
-        this.graph.data = this.data;
         this._d3.select('.line-chart').remove();
+        this.graph = new Graph();
+        this.graph.data = this.data;
         this.initChartWithData();
       }
     }
@@ -201,7 +184,6 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .scaleExtent([1, Infinity])
       .translateExtent([[0, 0], [this.graph.width, this.graph.height]])
       .extent([[0, 0], [this.graph.width, this.graph.height]])
-      .on('dblclick.zoom', null)
       .on('zoom', () => this.onZoom()));
   }
 
@@ -257,7 +239,8 @@ export class LineGraphComponent implements OnInit, OnChanges {
 
     this.graph.line = this._d3.line()
       .x((d: any) => this.graph.x_scale(d.time))
-      .y((d: any) => this.graph.y_scale(d.values.power));
+      .y((d: any) => this.graph.y_scale(d.values.power))
+      .curve(this._d3.curveBasis);
 
     this.graph.parent_group.append('path')
       .datum(this.graph.data)
@@ -273,7 +256,8 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.graph.area = this._d3.area()
       .x((d: any) => this.graph.x_scale(d.time))
       .y1((d: any) => this.graph.y_scale(d.values.power))
-      .y0(this.graph.height);
+      .y0(this.graph.height)
+      .curve(this._d3.curveBasis);
 
     this.addAreaToGraph();
   }

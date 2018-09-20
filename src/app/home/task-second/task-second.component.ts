@@ -34,6 +34,7 @@ export class TaskSecondComponent implements OnInit, OnDestroy {
     }, 2000);
   }
 
+  /**Get power reading and update power data when new day starts*/
   getPowerReading() {
     const toTime = new Date().getTime();
     const oneDayInMilliSeconds =  24 * 60 * 60 * 1000;
@@ -44,8 +45,12 @@ export class TaskSecondComponent implements OnInit, OnDestroy {
         this.currentDay = new Date().setHours(0, 0, 0, 0);
         this.powerService.getPowerReadingsForLastDay(this.currentDay, toTime).subscribe((newPowerData: Power[]) => {
           this.graphData = newPowerData;
-        });
+        }, err => {
+            console.error(err);
+          });
       }
+    }, err => {
+      console.error(err);
     });
   }
 

@@ -5,12 +5,13 @@
   border-radius: 20px;
   border: 2px #f3f3f3 solid;
   cursor: pointer;
+  background: #f3f3f3;
 }
 .left:hover {
-  background: #f3f3f3;
+  background: #fff;
 }
 .right:hover {
-  background: #f3f3f3;
+  background: #fff;
 }
 .left {
   float: left;

@@ -8,8 +8,8 @@ describe('LineGraphComponent', () => {
   let fixture: ComponentFixture<LineGraphComponent>;
   let D3_MOCK = jasmine.createSpyObj('D3_TOKEN',
     ['select', 'axisBottom', 'axisLeft', 'scaleTime', 'translateExtent',
-      'extent', 'scaleExtent', 'scaleLinear', 'call', 'line', 'datum', 'remove',
-      'append', 'attr', 'drag', 'on', 'bisector', 'text', 'zoom', 'area']);
+      'extent', 'scaleExtent', 'scaleLinear', 'call', 'line', 'datum', 'remove', 'curve',
+      'append', 'attr', 'drag', 'on', 'bisector', 'text', 'zoom', 'area', 'curveBasis']);
   D3_MOCK.event = {x: 1, y: 1, rescaleX: jasmine.createSpy('rescaleX').and.returnValue({})};
 
   afterEach(() => {
@@ -308,10 +308,10 @@ describe('LineGraphComponent', () => {
   it('should be able to draw drawLineGraph', () => {
     component.graph.width = 10;
     component.graph.height = 10;
-    const spy_line_y = {y: jasmine.createSpy('y')};
+    const spy_line_y = {y: jasmine.createSpy('y').and.returnValue({curve: jasmine.createSpy('curve')})};
     const spy_line_x = {x: jasmine.createSpy('x').and.returnValue(spy_line_y)};
     component.graph.data = [{'time': 1537079694837, 'values': {'power': 1676000, 'energy': 333531381728000}}];
-    const area_mock = jasmine.createSpyObj('area_mock', ['x', 'y0', 'y1'])
+    const area_mock = jasmine.createSpyObj('area_mock', ['x', 'y0', 'y1', 'curve']);
 
     D3_MOCK.attr.and.returnValue(D3_MOCK);
     D3_MOCK.call.and.returnValue(D3_MOCK);
@@ -319,6 +319,7 @@ describe('LineGraphComponent', () => {
     D3_MOCK.datum.and.returnValue(D3_MOCK);
     D3_MOCK.line.and.returnValue(spy_line_x);
     D3_MOCK.area.and.returnValue(area_mock);
+    D3_MOCK.curve.and.returnValue(area_mock);
     area_mock.x.and.returnValue(area_mock);
     area_mock.y0.and.returnValue(area_mock);
     area_mock.y1.and.returnValue(area_mock);

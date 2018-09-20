@@ -1,6 +1,10 @@
 body {
   margin: 0;
 }
+.today > span {
+  border: 1px solid #3f873a !important;
+  background: none !important;
+}
 .wc-date-container{
   border: 2px solid #3f873a !important;
   border-radius: 15px;
