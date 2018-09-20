@@ -1,7 +1,7 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {Graph} from '../../graph';
-import * as d3 from 'd3';
 import {Power} from '../../power';
+import {D3_TOKEN} from '../d3.config';
 
 @Component({
   selector: 'app-line-graph',
@@ -30,13 +30,15 @@ export class LineGraphComponent implements OnInit, OnChanges {
     zoomed_x_scale: undefined,
     transform_state: undefined,
     line: undefined,
+    area: undefined,
     margin: undefined,
     rectangular_selection: undefined,
     rectangular_selection_text: undefined,
     rectangular_selection_x_coordinate: undefined
   };
 
-  constructor() { }
+  constructor(@Inject(D3_TOKEN) private _d3: any) {
+  }
 
   ngOnInit() {
     this.graph.data = this.data;
@@ -55,7 +57,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     if (changes['data'] && this.data) {
       if (!changes['data'].isFirstChange()) {
         this.graph.data = this.data;
-        d3.select('.line-chart').remove();
+        this._d3.select('.line-chart').remove();
         this.initChartWithData();
       }
     }
@@ -76,18 +78,18 @@ export class LineGraphComponent implements OnInit, OnChanges {
   }
 
   redrawLineChart() {
-    // if zoomed in
+    // if already zoomed in
     if (this.graph.transform_state) {
       this.graph.x_scale.domain(this.graph.transform_state.rescaleX(this.graph.zoomed_x_scale).domain());
-      const x_axis = d3.axisBottom(this.graph.x_scale);
+      const x_axis = this._d3.axisBottom(this.graph.x_scale);
       this.graph.parent_group.select('.x-axis').call(x_axis);
-      this.graph.svg.select('.y-axis').call(d3.axisLeft(this.graph.y_scale));
+      this.graph.svg.select('.y-axis').call(this._d3.axisLeft(this.graph.y_scale));
     } else {
       this.setXYScale();
-      this.graph.svg.select('.x-axis').call(d3.axisBottom(this.graph.x_scale));
-      this.graph.svg.select('.y-axis').call(d3.axisLeft(this.graph.y_scale));
+      this.graph.svg.select('.x-axis').call(this._d3.axisBottom(this.graph.x_scale));
+      this.graph.svg.select('.y-axis').call(this._d3.axisLeft(this.graph.y_scale));
     }
-    this.graph.parent_group.select('.line').attr('d', this.graph.line);
+    this.addAreaToGraph();
   }
 
   initChartWithData() {
@@ -97,24 +99,6 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.drawLineGraph();
     this.initDragEvents();
     this.initZoomEvent();
-
-    const x = d3.scaleTime()
-      .rangeRound([0, this.graph.width]);
-
-    const y = d3.scaleLinear()
-      .rangeRound([this.graph.height, 0]);
-
-    const area: any = d3.area()
-      .x((d: any) => x(d.time))
-      .y1((d: any) => y(d.values.power));
-    y.domain([0, d3.max(this.graph.data, function(d) { return d.values.power; })]);
-    area.y0(y(0));
-
-    this.graph.parent_group.append('path')
-      .datum(this.graph.data)
-      .attr('fill', 'steelblue')
-      .attr('class', 'area')
-      .attr('d', area);
   }
 
   initializeSVGElement(): void {
@@ -122,10 +106,10 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.graph.margin = {top: 50, right: 50, bottom: 30, left: 60};
     this.graph.width = svgWidth - this.graph.margin.left - this.graph.margin.right;
     this.graph.height = svgHeight - this.graph.margin.top - this.graph.margin.bottom;
-    d3.select('.container').append('svg')
+    this._d3.select('.container').append('svg')
       .attr('class', 'line-chart');
 
-    this.graph.svg = d3.select('svg')
+    this.graph.svg = this._d3.select('svg')
       .attr('width', svgWidth)
       .attr('height', svgHeight);
 
@@ -139,7 +123,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
   }
 
   initDragEvents(): void {
-    this.graph.svg.call(d3.drag()
+    this.graph.svg.call(this._d3.drag()
       .on('drag', () => this.onDrag())
       .on('start', () => this.onDragStart())
       .on('end', () => this.onDragEnd()));
@@ -149,11 +133,11 @@ export class LineGraphComponent implements OnInit, OnChanges {
     if (this.graph.rectangular_selection) {
       this.graph.rectangular_selection.remove();
     }
-    this.graph.rectangular_selection_x_coordinate = d3.event.x;
+    this.graph.rectangular_selection_x_coordinate = this._d3.event.x;
     this.graph.rectangular_selection = this.graph.parent_group
       .append('g')
       .append('rect')
-      .attr('x', d3.event.x - this.graph.margin.left)
+      .attr('x', this._d3.event.x - this.graph.margin.left)
       .attr('y', 0)
       .attr('width', 1)
       .attr('fill', 'black')
@@ -167,12 +151,13 @@ export class LineGraphComponent implements OnInit, OnChanges {
     if (this.graph.rectangular_selection_text) {
       this.graph.rectangular_selection_text.remove();
     }
-    const rect_width = d3.event.x - this.graph.rectangular_selection_x_coordinate;
-    const bisect = d3.bisector((d: any) => d.time).left;
-    const power = this.graph.data[bisect(this.graph.data, new Date(this.graph.x_scale.invert(d3.event.x - this.graph.margin.left)))];
+    const rect_width = this._d3.event.x - this.graph.rectangular_selection_x_coordinate;
+    const bisect = this._d3.bisector((d: any) => d.time).left;
+    const power = this.graph.data[bisect(this.graph.data, new Date(this.graph.x_scale.invert(this._d3.event.x - this.graph.margin.left)))];
     const power2 = this.graph.data[bisect(this.graph.data,
       new Date(this.graph.x_scale.invert(this.graph.rectangular_selection_x_coordinate - this.graph.margin.left)))];
 
+    // When dragging left  to right
     if (rect_width > 0) {
       this.graph.rectangular_selection.attr('width', rect_width);
       energy2 = power2 ? power2.values.energy : 0;
@@ -181,6 +166,8 @@ export class LineGraphComponent implements OnInit, OnChanges {
       text_y_coordinate = this.graph.margin.top - 10;
       this.selected_region_energy = energy - energy2;
     } else {
+
+      // When dragging right to left
       this.graph.rectangular_selection
         .attr('x', this.graph.rectangular_selection_x_coordinate - this.graph.margin.left - Math.abs(rect_width))
         .attr('width', Math.abs(rect_width));
@@ -198,47 +185,52 @@ export class LineGraphComponent implements OnInit, OnChanges {
 
   }
   onDragEnd() {
-    if (this.graph.rectangular_selection_x_coordinate === d3.event.x) {
+    if (this.graph.rectangular_selection_x_coordinate === this._d3.event.x) {
       this.graph.rectangular_selection.remove();
       if (this.graph.rectangular_selection_text) {
         this.graph.rectangular_selection_text.remove();
       }
       this.selected_region_energy = undefined;
-    } else {
-
     }
   }
 
   initZoomEvent() {
-    this.graph.zoomed_x_scale = d3.scaleTime().rangeRound([0, this.graph.width]).domain(this.graph.x_scale.domain());
+    this.graph.zoomed_x_scale = this._d3.scaleTime().rangeRound([0, this.graph.width]).domain(this.graph.x_scale.domain());
 
-    this.graph.svg.call(d3.zoom()
+    this.graph.svg.call(this._d3.zoom()
       .scaleExtent([1, Infinity])
       .translateExtent([[0, 0], [this.graph.width, this.graph.height]])
       .extent([[0, 0], [this.graph.width, this.graph.height]])
-      .on('zoom', () => this.onZoom()))
-      .on('dblclick.zoom', null);
+      .on('dblclick.zoom', null)
+      .on('zoom', () => this.onZoom()));
   }
 
   onZoom() {
-    this.graph.transform_state = d3.event.transform;
-
+    if (this.graph.rectangular_selection) {
+      this.graph.rectangular_selection.remove();
+    }
+    if (this.graph.rectangular_selection_text) {
+      this.graph.rectangular_selection_text.remove();
+    }
+    this.graph.transform_state = this._d3.event.transform;
     this.graph.x_scale.domain(this.graph.transform_state.rescaleX(this.graph.zoomed_x_scale).domain());
-    this.graph.parent_group.select('.x-axis').call(d3.axisBottom(this.graph.x_scale));
+    this.graph.parent_group.select('.x-axis').call(this._d3.axisBottom(this.graph.x_scale));
     this.graph.parent_group.select('.line').attr('d', this.graph.line);
+    this.addAreaToGraph();
   }
 
 
   setXYScale() {
-    this.graph.x_scale = d3.scaleTime().domain([new Date().setHours(0, 0, 0, 0),
+    this.graph.x_scale = this._d3.scaleTime().domain([new Date().setHours(0, 0, 0, 0),
       new Date().setHours(0, 0, 0, 0) + (24 * 60 * 60 * 1000)]).rangeRound([0, this.graph.width]);
-    this.graph.y_scale = d3.scaleLinear().domain(d3.extent(this.graph.data, (d) => d.values.power)).rangeRound([this.graph.height, 0]);
+    this.graph.y_scale = this._d3.scaleLinear().domain(this._d3.extent(this.graph.data,
+      (d) => d.values.power)).rangeRound([this.graph.height, 0]);
   }
 
   drawXYAxis() {
     this.graph.y_axis = this.graph.parent_group.append('g')
       .attr('class', 'y-axis')
-      .call(d3.axisLeft(this.graph.y_scale))
+      .call(this._d3.axisLeft(this.graph.y_scale))
       .append('text')
       .attr('fill', '#000')
       .attr('transform', 'rotate(-90)')
@@ -250,9 +242,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.graph.x_axis = this.graph.parent_group.append('g')
       .attr('class', 'x-axis')
       .attr('transform', 'translate(0,' + this.graph.height + ')')
-      .call(d3.axisBottom(this.graph.x_scale))
-      .select('.domain')
-      .remove();
+      .call(this._d3.axisBottom(this.graph.x_scale));
   }
 
   drawLineGraph() {
@@ -265,7 +255,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .attr('width', this.graph.width)
       .attr('height', this.graph.height);
 
-    this.graph.line = d3.line()
+    this.graph.line = this._d3.line()
       .x((d: any) => this.graph.x_scale(d.time))
       .y((d: any) => this.graph.y_scale(d.values.power));
 
@@ -279,6 +269,25 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .attr('stroke-linecap', 'round')
       .attr('stroke-width', 1.5)
       .attr('d', this.graph.line);
+
+    this.graph.area = this._d3.area()
+      .x((d: any) => this.graph.x_scale(d.time))
+      .y1((d: any) => this.graph.y_scale(d.values.power))
+      .y0(this.graph.height);
+
+    this.addAreaToGraph();
+  }
+
+  addAreaToGraph() {
+    if (this._d3.select('.area')) {
+      this._d3.select('.area').remove();
+    }
+    this.graph.parent_group.append('path')
+      .datum(this.graph.data)
+      .attr('clip-path', 'url(#clip)')
+      .attr('class', 'area')
+      .attr('fill', '#3f873a')
+      .attr('d', this.graph.area);
   }
 
 }

@@ -1,3 +1,102 @@
 body {
   margin: 0;
 }
+.wc-date-container{
+  border: 2px solid #3f873a !important;
+  border-radius: 15px;
+  float: left !important;
+  width: auto !important;
+  height: 30px !important;
+  margin-bottom: 1px !important;
+  font-size: 16px !important;
+  padding: 5px 10px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  background: #fff !important;
+  line-height: 20px !important;
+}
+
+.wc-banner, .wc-details, .year-title, .calendar-day:hover > span, .selected-day > span {
+  background: #3f873a !important;
+}
+
+.calendar-days, .wc-date-container > span{
+  color: #3f873a !important;
+}
+
+body {
+  /*background-color: #222;*/
+}
+#preloader {
+  background: white;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#loader {
+  display: block;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #3f873a;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+#loader:before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #7dcc77;
+  -webkit-animation: spin 3s linear infinite;
+  animation: spin 3s linear infinite;
+}
+#loader:after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #aef9a9;
+  -webkit-animation: spin 1.5s linear infinite;
+  animation: spin 1.5s linear infinite;
+}
+@-webkit-keyframes spin {
+  0%   {
+    -webkit-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  0%   {
+    -webkit-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}

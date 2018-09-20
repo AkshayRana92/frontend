@@ -6,6 +6,7 @@ import {RouterModule} from '@angular/router';
 import {app_routes} from './app.routing';
 import {HttpClientModule} from '@angular/common/http';
 import {HomeModule} from './home/home.module';
+import {SharedModule} from './shared/shared.module';
 
 
 @NgModule({
@@ -16,6 +17,7 @@ import {HomeModule} from './home/home.module';
     BrowserModule,
     RouterModule.forRoot(app_routes),
     HttpClientModule,
+    SharedModule,
     HomeModule
   ],
   providers: [],

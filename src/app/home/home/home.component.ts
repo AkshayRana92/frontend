@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
+import {LoaderService} from '../../shared/loader/loader.service';
 
 @Component({
   selector: 'app-home',
@@ -8,9 +9,10 @@ import {Router} from '@angular/router';
 })
 export class HomeComponent {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private loader: LoaderService) { }
 
   goTo(route: string) {
+    this.loader.startLoading();
     this.router.navigate([route]);
   }
 }

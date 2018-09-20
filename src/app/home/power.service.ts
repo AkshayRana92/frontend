@@ -13,8 +13,8 @@ export class PowerService {
   constructor(private http: HttpClient) { }
 
   getPowerReadingsForLastDay(fromTime: number, toTime: number): Observable<any> {
-    // const GET_POWER_URL = `${this.api}/power?from=${fromTime}&to=${toTime}`;
-    const GET_POWER_URL = `http://localhost:4200/assets/powers.json`;
+    const GET_POWER_URL = `${this.api}/power?from=${fromTime}&to=${toTime}`;
+    // const GET_POWER_URL = `http://localhost:4200/assets/powers.json`;
     return this.http.get(GET_POWER_URL).pipe(
       catchError(this.handleError)
     );

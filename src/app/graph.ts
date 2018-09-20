@@ -17,6 +17,7 @@ export class Graph {
   zoomed_x_scale: any;
   transform_state: ZoomTransform;
   line: any;
+  area: any;
   margin: Margin;
   rectangular_selection: Selection<BaseType, any, HTMLElement, any>;
   rectangular_selection_text: Selection<BaseType, any, HTMLElement, any>;

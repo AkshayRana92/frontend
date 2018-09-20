@@ -1,3 +1,9 @@
-<p>
-  task-first works!
-</p>
+<div class="container-task">
+  <angular2-date-picker [(ngModel)]="date" [settings]="settings"></angular2-date-picker>
+  <h2>ENERGY: <span>{{newPower?.values.energy || 0}}</span></h2>
+  <h2>COST: <span>{{newPower?.values.energy/ 10000 || 0}}</span></h2>
+</div>
+<app-line-graph
+  [data]="graphData"
+  [newValue] = "newPower"
+></app-line-graph>

@@ -1,0 +1,23 @@
+.left, .right {
+  /*padding: 5%;*/
+  width: 45%;
+  text-align: center;
+  border-radius: 20px;
+  border: 2px #f3f3f3 solid;
+  cursor: pointer;
+}
+.left:hover {
+  background: #f3f3f3;
+}
+.right:hover {
+  background: #f3f3f3;
+}
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+.home-container {
+  padding: 5%;
+}

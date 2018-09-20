@@ -1,0 +1,17 @@
+.container{
+  padding: 0 2%;
+}
+
+h2 {
+  padding: 0 2%;
+  font-size: 1.3em;
+  float: right;
+}
+angular2-date-picker {
+  padding-top: 2%;
+  padding-left: 2%;
+  float: left;
+}
+span {
+  color: #3f873a;
+}
