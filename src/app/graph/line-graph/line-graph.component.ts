@@ -28,6 +28,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.initChartWithData();
   }
 
+  /** Adds new record to the graph and updates the entire graph if the data changes*/
   ngOnChanges(changes: SimpleChanges) {
     if (changes['newValue'] && this.newValue) {
       if (!changes['newValue'].isFirstChange()) {
@@ -46,20 +47,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     }
   }
 
-
-  updateGraphData(newPower: any) {
-    // TODO: find out wtf is this
-    // const newStartTime: number = newPower.time - (24 * 60 * 60 * 1000);
-    // for (let i = 0; i < this.graph.data.length; i++) {
-    //   if (this.graph.data[i].time < newStartTime) {
-    //     this.graph.data.shift();
-    //   } else {
-    //     break;
-    //   }
-    // }
-    this.graph.data.push(newPower);
-  }
-
+  /** Re-draws the graph with the axis and area*/
   redrawLineChart() {
     // if already zoomed in
     if (this.graph.transform_state) {
@@ -75,6 +63,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.addAreaToGraph();
   }
 
+  /** Initialize the graph*/
   initChartWithData() {
     this.initializeSVGElement();
     this.setXYScale();
@@ -84,6 +73,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.initZoomEvent();
   }
 
+  /** Initialize svg element for graph*/
   initializeSVGElement(): void {
     const svgWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 600), svgHeight = 300;
     this.graph.margin = {top: 50, right: 50, bottom: 30, left: 60};
@@ -105,6 +95,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .attr('pointer-events', 'all');
   }
 
+  /** Initialize drag events on graph*/
   initDragEvents(): void {
     this.graph.svg.call(this._d3.drag()
       .on('drag', () => this.onDrag())
@@ -112,6 +103,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .on('end', () => this.onDragEnd()));
   }
 
+  /** Handle drag start event*/
   onDragStart() {
     if (this.graph.rectangular_selection) {
       this.graph.rectangular_selection.remove();
@@ -129,6 +121,8 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .attr('class', 'rect-main');
 
   }
+
+  /** Handle drag event*/
   onDrag() {
     let energy: number, energy2: number, text_x_coordinate: number, text_y_coordinate;
     if (this.graph.rectangular_selection_text) {
@@ -167,6 +161,8 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .attr('font-weight', 'bold');
 
   }
+
+  /** Handle drag end event*/
   onDragEnd() {
     if (this.graph.rectangular_selection_x_coordinate === this._d3.event.x) {
       this.graph.rectangular_selection.remove();
@@ -177,6 +173,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     }
   }
 
+  /** Initialize zoom event on graph*/
   initZoomEvent() {
     this.graph.zoomed_x_scale = this._d3.scaleTime().rangeRound([0, this.graph.width]).domain(this.graph.x_scale.domain());
 
@@ -187,6 +184,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .on('zoom', () => this.onZoom()));
   }
 
+  /** Handle zoom event*/
   onZoom() {
     if (this.graph.rectangular_selection) {
       this.graph.rectangular_selection.remove();
@@ -201,7 +199,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
     this.addAreaToGraph();
   }
 
-
+  /** Set X Y scale for the graph*/
   setXYScale() {
     this.graph.x_scale = this._d3.scaleTime().domain([new Date().setHours(0, 0, 0, 0),
       new Date().setHours(0, 0, 0, 0) + (24 * 60 * 60 * 1000)]).rangeRound([0, this.graph.width]);
@@ -209,6 +207,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       (d) => d.values.power)).rangeRound([this.graph.height, 0]);
   }
 
+  /** Draw X and Y axis based on the respective scales*/
   drawXYAxis() {
     this.graph.y_axis = this.graph.parent_group.append('g')
       .attr('class', 'y-axis')
@@ -227,6 +226,7 @@ export class LineGraphComponent implements OnInit, OnChanges {
       .call(this._d3.axisBottom(this.graph.x_scale));
   }
 
+  /** Draw line graph with the area*/
   drawLineGraph() {
     this.graph.svg.append('defs')
       .append('clipPath')
